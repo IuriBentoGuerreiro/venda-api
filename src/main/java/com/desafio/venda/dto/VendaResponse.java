@@ -15,14 +15,16 @@ public class VendaResponse {
     private LocalDateTime dataVenda;
     private BigDecimal valor;
 
-    private Vendedor vendedor;
+    private Integer vendedorId;
+    private String vendedorNome;
 
-    public static VendaResponse convert(Venda venda){
+    public static VendaResponse convert(Venda venda) {
         return VendaResponse.builder()
                 .id(venda.getId())
                 .dataVenda(venda.getDataVenda())
                 .valor(venda.getValor())
-                .vendedor(venda.getVendedorId())
+                .vendedorId(venda.getVendedorId())
+                .vendedorNome(venda.getVendedorNome())
                 .build();
     }
 }

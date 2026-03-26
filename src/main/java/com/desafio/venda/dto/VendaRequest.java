@@ -10,4 +10,5 @@ public class VendaRequest {
     private BigDecimal valor;
 
     private Integer vendedorId;
+    private String vendedorNome;
 }

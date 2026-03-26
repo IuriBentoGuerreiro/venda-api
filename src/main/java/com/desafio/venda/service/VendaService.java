@@ -2,11 +2,16 @@ package com.desafio.venda.service;
 
 import com.desafio.venda.dto.VendaRequest;
 import com.desafio.venda.dto.VendaResponse;
+import com.desafio.venda.dto.VendedorResumoResponse;
 import com.desafio.venda.model.Venda;
 import com.desafio.venda.repository.VendaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Service
@@ -30,5 +35,31 @@ public class VendaService {
                 .stream()
                 .map(VendaResponse::convert)
                 .toList();
+    }
+
+    public List<VendedorResumoResponse> relatorio(LocalDateTime inicio, LocalDateTime fim) {
+
+        List<VendedorResumoResponse> resultados = vendaRepository.buscarResumo(inicio, fim);
+
+        long dias = ChronoUnit.DAYS.between(
+                inicio.toLocalDate(),
+                fim.toLocalDate()
+        ) + 1;
+
+        return resultados.stream().map(r -> {
+
+            BigDecimal media = r.mediaDiaria().divide(
+                    BigDecimal.valueOf(dias),
+                    2,
+                    RoundingMode.HALF_UP
+            );
+
+            return new VendedorResumoResponse(
+                    r.nome(),
+                    r.totalVendas(),
+                    media
+            );
+
+        }).toList();
     }
 }
