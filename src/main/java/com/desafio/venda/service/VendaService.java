@@ -2,6 +2,7 @@ package com.desafio.venda.service;
 
 import com.desafio.venda.dto.VendaRequest;
 import com.desafio.venda.dto.VendaResponse;
+import com.desafio.venda.dto.VendedorResumoQuery;
 import com.desafio.venda.dto.VendedorResumoResponse;
 import com.desafio.venda.exception.NotFoundException;
 import com.desafio.venda.model.Venda;
@@ -39,36 +40,21 @@ public class VendaService {
     }
 
     public List<VendedorResumoResponse> relatorio(LocalDateTime inicio, LocalDateTime fim) {
-
-        if (fim.isBefore(inicio)) {
-            throw new IllegalArgumentException("Data fim não pode ser menor que início");
+        if (inicio.isAfter(fim)) {
+            throw new IllegalArgumentException("Data inicial não pode ser maior que a data final");
         }
 
-        List<VendedorResumoResponse> resultados = vendaRepository.buscarResumo(inicio, fim);
+        List<VendedorResumoQuery> resultados = vendaRepository.buscarResumo(inicio, fim);
 
-        long dias = ChronoUnit.DAYS.between(
-                inicio.toLocalDate(),
-                fim.toLocalDate()
-        ) + 1;
+        long dias = ChronoUnit.DAYS.between(inicio.toLocalDate(), fim.toLocalDate()) + 1;
 
-        if (dias <= 0) {
-            throw new IllegalArgumentException("Período inválido");
-        }
-
-        return resultados.stream().map(r -> {
-
-            BigDecimal media = r.mediaDiaria().divide(
-                    BigDecimal.valueOf(dias),
-                    2,
-                    RoundingMode.HALF_UP
-            );
-
-            return new VendedorResumoResponse(
-                    r.nome(),
-                    r.totalVendas(),
-                    media
-            );
-
-        }).toList();
+        return resultados.stream()
+                .map(r -> new VendedorResumoResponse(
+                        r.nome(),
+                        r.totalVendas(),
+                        r.totalValor(),
+                        r.totalValor().divide(BigDecimal.valueOf(dias), 2, RoundingMode.HALF_UP)
+                ))
+                .toList();
     }
 }

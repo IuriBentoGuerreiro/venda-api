@@ -2,10 +2,8 @@ package com.desafio.venda.dto;
 
 import java.math.BigDecimal;
 
-public record VendedorResumoResponse(
+public record VendedorResumoQuery(
         String nome,
         Long totalVendas,
-        BigDecimal totalValor,
-        BigDecimal mediaDiaria
-) {
-}
+        BigDecimal totalValor
+) {}
