@@ -3,6 +3,7 @@ package com.desafio.venda.service;
 import com.desafio.venda.dto.VendaRequest;
 import com.desafio.venda.dto.VendaResponse;
 import com.desafio.venda.dto.VendedorResumoResponse;
+import com.desafio.venda.exception.NotFoundException;
 import com.desafio.venda.model.Venda;
 import com.desafio.venda.repository.VendaRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +27,7 @@ public class VendaService {
 
     public VendaResponse findById(Integer id) {
         return VendaResponse.convert(vendaRepository.findById(id).orElseThrow(
-                () -> new RuntimeException("Venda não encontrada")
+                () -> new NotFoundException("Venda não encontrada")
         ));
     }
 
@@ -39,12 +40,20 @@ public class VendaService {
 
     public List<VendedorResumoResponse> relatorio(LocalDateTime inicio, LocalDateTime fim) {
 
+        if (fim.isBefore(inicio)) {
+            throw new IllegalArgumentException("Data fim não pode ser menor que início");
+        }
+
         List<VendedorResumoResponse> resultados = vendaRepository.buscarResumo(inicio, fim);
 
         long dias = ChronoUnit.DAYS.between(
                 inicio.toLocalDate(),
                 fim.toLocalDate()
         ) + 1;
+
+        if (dias <= 0) {
+            throw new IllegalArgumentException("Período inválido");
+        }
 
         return resultados.stream().map(r -> {
 
